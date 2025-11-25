@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Quiz;
 use App\Models\Progress;
+use App\Models\QuizResult;
 use Illuminate\Http\Request;
 
 class QuizController extends Controller
@@ -38,6 +39,19 @@ class QuizController extends Controller
         }
 
         $percentage = $total > 0 ? ($score / $total) * 100 : 0;
+        $passed = $percentage >= 70;
+
+        // Save quiz result
+        QuizResult::create([
+            'user_id' => $user->id,
+            'quiz_id' => $quiz->id,
+            'score' => $score,
+            'total_questions' => $total,
+            'percentage' => round($percentage, 2),
+            'passed' => $passed,
+            'answers' => $answers,
+            'questions' => $questions,
+        ]);
 
         // Update progress
         Progress::updateOrCreate(
@@ -49,7 +63,8 @@ class QuizController extends Controller
             'score' => $score,
             'total' => $total,
             'percentage' => round($percentage, 2),
-            'passed' => $percentage >= 70 // Assuming 70% is passing grade
+            'passed' => $passed,
+            'message' => 'Quiz submitted successfully'
         ]);
     }
 
@@ -60,5 +75,19 @@ class QuizController extends Controller
             ->where('module_id', $id)
             ->first();
         return response()->json($progress);
+    }
+
+    public function history(Request $request)
+    {
+        $user = $request->user();
+        $quizId = $request->query('quiz_id');
+
+        $results = QuizResult::with('quiz')
+            ->where('user_id', $user->id)
+            ->when($quizId, fn($q) => $q->where('quiz_id', $quizId))
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($results);
     }
 }

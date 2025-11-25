@@ -43,7 +43,7 @@ class ModuleSeeder extends Seeder
             'class_id' => $databaseClass->id,
             'title' => 'Join & Relasi Tabel',
             'type' => 'video',
-            'content_url' => 'https://youtube.com/tutorial-sql-join',
+            'content_url' => 'https://www.youtube.com/watch?v=9yeOJ0ZMUYw',
         ]);
     }
 }

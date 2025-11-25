@@ -29,11 +29,13 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
 
     // Class routes
     Route::get('/classes', [ClassController::class, 'index']);
     Route::post('/classes/join', [ClassController::class, 'join']);
     Route::get('/classes/{id}', [ClassController::class, 'show']);
+    Route::get('/classes/{id}/students', [ClassController::class, 'students']);
 
     // Module routes
     Route::get('/modules', [ModuleController::class, 'index']);
@@ -48,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/quizzes', [QuizController::class, 'index']);
     Route::post('/quizzes/{id}/submit', [QuizController::class, 'submit']);
     Route::get('/quizzes/{id}/result', [QuizController::class, 'result']);
+    Route::get('/quiz-history', [QuizController::class, 'history']);
 
     // Recommendation routes
     Route::get('/recommendations', [RecommendationController::class, 'index']);
