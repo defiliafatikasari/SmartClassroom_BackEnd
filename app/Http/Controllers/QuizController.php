@@ -23,27 +23,33 @@ class QuizController extends Controller
         $user = $request->user();
         $answers = $request->input('answers', []);
 
-        // Simple scoring: assume correct if answer is 'a'
+        // Scoring based on question index
         $questions = $quiz->questions_json;
         $score = 0;
-        foreach ($questions as $q) {
-            if (isset($answers[$q['id']]) && $answers[$q['id']] == $q['correct']) {
+        $total = count($questions);
+
+        foreach ($questions as $index => $question) {
+            $userAnswer = $answers[$index] ?? null;
+            $correctAnswer = $question['answer'] ?? null;
+
+            if ($userAnswer !== null && $userAnswer == $correctAnswer) {
                 $score++;
             }
         }
-        $total = count($questions);
+
         $percentage = $total > 0 ? ($score / $total) * 100 : 0;
 
         // Update progress
         Progress::updateOrCreate(
             ['user_id' => $user->id, 'module_id' => $quiz->module_id],
-            ['score' => $percentage]
+            ['score' => $percentage, 'completed' => true]
         );
 
         return response()->json([
             'score' => $score,
             'total' => $total,
-            'percentage' => $percentage
+            'percentage' => round($percentage, 2),
+            'passed' => $percentage >= 70 // Assuming 70% is passing grade
         ]);
     }
 
